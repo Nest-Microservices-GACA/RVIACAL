@@ -1,9 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CommonService } from 'src/common/common.service';
-import { Application } from './dto/application.entity';
-import { CreateRateProject } from './dto/create-rateproject.dto';
+import { RpcException } from '@nestjs/microservices';
+import { Application } from './entities/application.entity';
+import { UpdateRateProjectIdDto } from './dto/update-rate-project-id.dto';
 
 @Injectable()
 export class RviacalService {
@@ -11,40 +11,35 @@ export class RviacalService {
 
   constructor(
     @InjectRepository(Application)
-    private readonly applicationRepository: Repository<Application>,
-    private readonly encryptionService: CommonService,
+    private readonly appRepository: Repository<Application>
   ) {}
 
-  async addAppRateProject(id: number, createRateProject: CreateRateProject) {
-    try {
-      const application = await this.applicationRepository.findOne({
-        where: { idu_aplicacion: id },
+  async addAppRateProject(idu_proyecto: string, updateRateProjectIdDto: UpdateRateProjectIdDto) {
+    
+    const app = await this.appRepository.findOne({ where: { idu_proyecto: idu_proyecto } });
+    if ( !app ) {
+      this.logger.error('[rviacal.addAppRateProject.service]');
+      throw new RpcException({
+        status: 404,
+        message: `App ${ idu_proyecto } no encontrada`,
       });
-
-      if (!application) throw new NotFoundException(`Aplicación con ID ${id} no encontrado`);
-
-      application.opc_arquitectura = {
-        ...application.opc_arquitectura,
-        [createRateProject.opcArquitectura]: true,
-      };
-
-      application.opc_estatus_calificar = 2;
-
-      await this.applicationRepository.save(application);
-
-      application.nom_aplicacion = this.encryptionService.decrypt(application.nom_aplicacion);
-
-      return application;
-    } catch (error) {
-      this.handleDBExceptions(error);
     }
-  }
 
-  private handleDBExceptions(error: any) {
-    if (error.code === '23505') throw new BadRequestException(error.detail);
-    if (error.response) throw new BadRequestException(error.message);
+    
+    app.opc_arquitectura = {
+      ...app.opc_arquitectura,
+      [updateRateProjectIdDto.opc_arquitectura]: true,
+    };
+    
 
-    this.logger.error(error);
-    throw new InternalServerErrorException('Unexpected error, check server logs');
+    app.opc_estatus_calificar = updateRateProjectIdDto.opc_estatus_calificar;
+    await this.appRepository.save(app);
+
+    // TODO: Implementar lógica para llamar a addons
+    
+    return {
+      message: `Test case añadido a la aplicación ${idu_proyecto}`,
+      application: app
+    };
   }
 }

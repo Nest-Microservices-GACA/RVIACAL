@@ -32,7 +32,7 @@ export class Application {
     @Column()
     @IsNumber()
     @Type(() => Number)
-    opc_estatus_doc_code: number;
+    opc_estatus_doc_code: string;
 
     @Column()
     @IsNumber()
