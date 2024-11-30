@@ -1,4 +1,4 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { RviacalService } from './rviacal.service';
 import { UpdateRateProjectIdDto } from './dto/update-rate-project-id.dto';
@@ -9,6 +9,8 @@ export class RviacalController {
 
   @MessagePattern('rate-project')
   addAppRateProject(@Payload() updateRateProjectIdDto: UpdateRateProjectIdDto) {
+    console.log(updateRateProjectIdDto);
+    //return 0;
     return this.rviacalService.addAppRateProject(updateRateProjectIdDto.idu_proyecto, updateRateProjectIdDto);
   }
 }

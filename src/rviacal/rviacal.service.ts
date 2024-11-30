@@ -28,7 +28,7 @@ export class RviacalService {
     
     app.opc_arquitectura = {
       ...app.opc_arquitectura,
-      [updateRateProjectIdDto.opc_arquitectura]: true,
+      [updateRateProjectIdDto.opcArquitectura]: true,
     };
     
 

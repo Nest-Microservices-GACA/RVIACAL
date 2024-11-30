@@ -1,19 +1,18 @@
 import { Transform } from "class-transformer";
-import { IsIn, IsNumber, IsString } from "class-validator";
+import { IsIn, IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateRateProjectIdDto {
-    @IsString()
-    idu_proyecto: string;
-
+    @IsOptional()
     @IsNumber()
-    @Transform(({ value }) => parseInt(value, 10))
-    @IsIn([4], {
-        message: 'La opción debe ser 4',
-    })
-    opc_arquitectura: number;
+    @IsIn([4], { message: 'La opción debe ser 4' })
+    @Transform(({ value }) => (value !== undefined ? parseInt(value, 10) : undefined))
+    opcArquitectura?: number;
 
     @IsNumber()
     @Transform(({ value }) => parseInt(value, 10))
     opc_estatus_calificar: number;
-    
+
+    constructor() {
+        this.opcArquitectura = 4; 
+    }
 }
